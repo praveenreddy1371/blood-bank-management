@@ -1,0 +1,228 @@
+# Blood Bank Management System — Setup Guide
+========================================================
+
+## Project Structure
+```
+blood-bank/
+├── frontend/
+│   ├── index.html      ← Main UI (open this in browser)
+│   ├── style.css       ← All styles
+│   └── app.js          ← All API calls & UI logic
+│
+└── backend/
+    ├── pom.xml                          ← Maven dependencies
+    └── src/main/
+        ├── resources/
+        │   └── application.properties  ← DB config (EDIT THIS)
+        └── java/com/bloodbank/
+            ├── BloodBankApplication.java
+            ├── CorsConfig.java
+            ├── model/
+            │   ├── Donor.java
+            │   ├── Hospital.java
+            │   ├── DonationRecord.java
+            │   ├── BloodRequest.java
+            │   └── BloodStock.java
+            ├── repository/
+            │   ├── DonorRepository.java
+            │   ├── HospitalRepository.java
+            │   ├── DonationRecordRepository.java
+            │   ├── BloodRequestRepository.java
+            │   └── BloodStockRepository.java
+            └── controller/
+                ├── DonorController.java
+                ├── HospitalController.java
+                ├── DonationController.java
+                ├── BloodRequestController.java
+                └── BloodStockController.java
+```
+
+========================================================
+## STEP 1 — Install Required Tools
+========================================================
+
+1. Java 17+        → https://adoptium.net/
+2. Maven 3.8+      → https://maven.apache.org/download.cgi
+   (or use IntelliJ IDEA which bundles Maven)
+3. MySQL Workbench  → Already installed ✓
+4. IntelliJ IDEA   → https://www.jetbrains.com/idea/download/
+   (Community Edition is free — use this as your IDE)
+
+Verify installations by opening a terminal and running:
+   java -version
+   mvn -version
+
+
+========================================================
+## STEP 2 — Prepare Your MySQL Database
+========================================================
+
+1. Open MySQL Workbench
+2. Make sure your database is named: blood_bank_management
+   (If it has a different name, note it down)
+3. Make sure all your tables exist:
+   - donor
+   - hospital
+   - donation_records
+   - blood_request
+   - blood_stock
+   - admin
+
+
+========================================================
+## STEP 3 — Configure the Backend
+========================================================
+
+Open this file in a text editor:
+   backend/src/main/resources/application.properties
+
+Change these two lines:
+   spring.datasource.url=jdbc:mysql://localhost:3306/YOUR_DB_NAME
+   spring.datasource.password=YOUR_MYSQL_PASSWORD
+
+Example (if your DB is "blood_bank_management" and password is "root"):
+   spring.datasource.url=jdbc:mysql://localhost:3306/blood_bank_management?useSSL=false&serverTimezone=UTC
+   spring.datasource.username=root
+   spring.datasource.password=root
+
+
+========================================================
+## STEP 4 — Open Project in IntelliJ IDEA
+========================================================
+
+1. Open IntelliJ IDEA
+2. Click "Open" → Select the `backend/` folder
+3. IntelliJ will detect it's a Maven project and download dependencies
+   (This takes 2–5 minutes the first time — wait for the progress bar)
+4. Once done, find and open: BloodBankApplication.java
+5. Click the GREEN PLAY BUTTON (▶) next to the main() method
+6. You should see in the console:
+      "Started BloodBankApplication on port 8080"
+   ✓ Backend is running!
+
+If you see errors:
+   - "Access denied for user" → Wrong password in application.properties
+   - "Unknown database" → Wrong database name in application.properties
+   - Port 8080 in use → Add: server.port=8081 to application.properties
+     (then also change `const API = 'http://localhost:8081/api'` in app.js)
+
+
+========================================================
+## STEP 5 — Run the Frontend
+========================================================
+
+Option A — Simplest way (just open in browser):
+   1. Navigate to the `frontend/` folder
+   2. Double-click index.html → Opens in your browser
+   ✓ Done! The UI connects to your backend at localhost:8080
+
+Option B — Using VS Code Live Server (recommended):
+   1. Install VS Code → https://code.visualstudio.com/
+   2. Install extension "Live Server" by Ritwick Dey
+   3. Open the frontend/ folder in VS Code
+   4. Right-click index.html → "Open with Live Server"
+   ✓ Auto-refreshes when you edit files
+
+
+========================================================
+## STEP 6 — Test Your Application
+========================================================
+
+Open your browser and go to:
+   http://localhost:8080/api/donors        ← Should return JSON list
+   http://localhost:8080/api/hospitals     ← Should return JSON list
+   http://localhost:8080/api/stock         ← Should return JSON list
+
+If those work, open index.html in your browser.
+The dashboard should load with your real data!
+
+
+========================================================
+## API Reference (All Available Endpoints)
+========================================================
+
+DONORS
+  GET    /api/donors                      → All donors
+  GET    /api/donors/{id}                 → One donor
+  GET    /api/donors/bloodgroup/{group}   → Filter by blood group
+  GET    /api/donors/available            → Available donors only
+  POST   /api/donors                      → Add donor
+  PUT    /api/donors/{id}                 → Update donor
+  DELETE /api/donors/{id}                 → Delete donor
+
+HOSPITALS
+  GET    /api/hospitals                   → All hospitals
+  GET    /api/hospitals/{id}              → One hospital
+  POST   /api/hospitals                   → Add hospital
+  PUT    /api/hospitals/{id}              → Update hospital
+  DELETE /api/hospitals/{id}             → Delete hospital
+
+DONATIONS
+  GET    /api/donations                   → All records
+  GET    /api/donations/donor/{id}        → By donor
+  GET    /api/donations/hospital/{id}     → By hospital
+  POST   /api/donations                   → Add record
+  DELETE /api/donations/{id}              → Delete record
+
+BLOOD REQUESTS
+  GET    /api/requests                    → All requests
+  GET    /api/requests/status/Pending     → Pending only
+  GET    /api/requests/bloodgroup/{group} → By blood group
+  POST   /api/requests                    → New request
+  PATCH  /api/requests/{id}/status?status=Approved  → Approve
+  PATCH  /api/requests/{id}/status?status=Rejected  → Reject
+  DELETE /api/requests/{id}               → Delete
+
+BLOOD STOCK
+  GET    /api/stock                       → All stock
+  GET    /api/stock/hospital/{id}         → By hospital
+  POST   /api/stock                       → Add/update stock
+  DELETE /api/stock/{id}                  → Delete entry
+
+
+========================================================
+## How Frontend Connects to Backend (The "Glue")
+========================================================
+
+The connection is in frontend/app.js, line 1:
+   const API = 'http://localhost:8080/api';
+
+Every button click calls a function like:
+   fetch('http://localhost:8080/api/donors')
+
+The backend receives this, queries MySQL, and returns JSON.
+The frontend reads the JSON and displays it in the table.
+
+Flow diagram:
+   [Browser/HTML] → click button
+        ↓
+   [app.js] → fetch('http://localhost:8080/api/...')
+        ↓
+   [Spring Boot Controller] → receives HTTP request
+        ↓
+   [JPA Repository] → runs SQL on MySQL
+        ↓
+   [MySQL Database] → returns data
+        ↓
+   [Controller] → sends JSON response
+        ↓
+   [app.js] → receives JSON, updates the HTML table
+
+
+========================================================
+## Troubleshooting
+========================================================
+
+Problem: "CORS error" in browser console
+Fix: Make sure CorsConfig.java is present and backend is running
+
+Problem: Table shows nothing / "Error" toast
+Fix: Check browser console (F12) for the exact error message
+     Most likely the backend is not running — start it first
+
+Problem: "Failed to fetch" in browser
+Fix: Backend is not running. Start BloodBankApplication.java first
+
+Problem: Data not saving to DB
+Fix: Check IntelliJ console for red error messages
+     Usually a column name mismatch — compare model fields with your DB columns
