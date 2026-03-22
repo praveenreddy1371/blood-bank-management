@@ -1,5 +1,12 @@
 const API = 'http://localhost:8080/api';
 
+// ─── Auth Protection ──────────────────────────────────────────
+const _role = sessionStorage.getItem('role');
+const _user = sessionStorage.getItem('user');
+if (!_role || !_user || _role !== 'admin') {
+  window.location.href = 'login.html';
+}
+
 // ─── Navigation ───────────────────────────────────────────────
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -18,6 +25,11 @@ function loadSection(id) {
   else if (id === 'donations') loadDonations();
   else if (id === 'requests') loadRequests();
   else if (id === 'stock') loadStock();
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
 }
 
 // ─── Toast ─────────────────────────────────────────────────────
@@ -64,7 +76,7 @@ async function loadDashboard() {
     const pending = requests.filter(r => r.status === 'Pending').length;
     document.getElementById('pendingRequests').textContent = pending;
     renderBloodStockGrid(stock);
-  } catch(e) { /* handled in apiFetch */ }
+  } catch(e) {}
 }
 
 function renderBloodStockGrid(stock) {

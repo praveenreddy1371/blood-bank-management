@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LifeFlow — Blood Bank Management</title>
+  <title>LifeFlow — Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
@@ -13,6 +13,7 @@
       <span class="logo-icon">&#9829;</span>
       <span class="logo-text">LifeFlow</span>
     </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);padding:0 8px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Admin Panel</div>
     <ul class="nav-links">
       <li class="active" onclick="showSection('dashboard')"><span class="icon">&#9632;</span> Dashboard</li>
       <li onclick="showSection('donors')"><span class="icon">&#128100;</span> Donors</li>
@@ -21,6 +22,9 @@
       <li onclick="showSection('requests')"><span class="icon">&#128203;</span> Blood Requests</li>
       <li onclick="showSection('stock')"><span class="icon">&#128202;</span> Blood Stock</li>
     </ul>
+    <div style="margin-top:auto;padding-top:2rem">
+      <button class="btn-secondary" onclick="logout()" style="width:100%;font-size:13px;color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2)">&#128274; Logout</button>
+    </div>
   </nav>
 
   <main class="main-content">

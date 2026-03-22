@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LifeFlow — User Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .profile-banner {
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      border-radius: 16px; padding: 2rem; color: #fff;
+      display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;
+    }
+    .avatar {
+      width: 65px; height: 65px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 24px; color: #fff; flex-shrink: 0;
+    }
+    .profile-info h2 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 4px; }
+    .profile-info p { font-size: 13px; opacity: 0.85; margin-bottom: 2px; }
+    .blood-pill {
+      margin-left: auto; background: rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 12px 20px; text-align: center; flex-shrink: 0;
+    }
+    .blood-pill .bg { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; }
+    .blood-pill .bl { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+    .donor-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.25rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .donor-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--red-light); display: flex; align-items: center;
+      justify-content: center; font-weight: 600; color: var(--red); flex-shrink: 0;
+    }
+    .donor-info { flex: 1; }
+    .donor-info strong { display: block; font-size: 14px; color: var(--text); }
+    .donor-info span { font-size: 12px; color: var(--text-muted); }
+    .donors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  </style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="logo"><span class="logo-icon">&#9829;</span><span class="logo-text">LifeFlow</span></div>
+  <ul class="nav-links">
+    <li class="active" onclick="showSection('uHome', this)"><span class="icon">🏠</span> Home</li>
+    <li onclick="showSection('uDonors', this)"><span class="icon">🩸</span> Find Donors</li>
+    <li onclick="showSection('uStock', this)"><span class="icon">📊</span> Blood Stock</li>
+    <li onclick="showSection('uRequest', this)"><span class="icon">📋</span> Blood Request</li>
+    <li onclick="showSection('uMyDonations', this)"><span class="icon">📜</span> My Donations</li>
+    <li onclick="showSection('uProfile', this)"><span class="icon">👤</span> My Profile</li>
+  </ul>
+  <div style="margin-top:auto;padding-top:2rem">
+    <button class="btn-secondary" onclick="logout()" style="width:100%;font-size:13px">Logout</button>
+  </div>
+</nav>
+
+<main class="main-content">
+
+  <!-- HOME -->
+  <section id="uHome" class="section active">
+    <div class="page-header">
+      <div><h1 id="welcomeMsg">Welcome!</h1><p class="subtitle">Blood Bank Portal</p></div>
+    </div>
+    <div class="profile-banner">
+      <div class="avatar" id="homeAvatar">?</div>
+      <div class="profile-info">
+        <h2 id="homeName">—</h2>
+        <p id="homeEmail">—</p>
+        <p id="homePhone">—</p>
+        <p id="homeCity">—</p>
+      </div>
+      <div class="blood-pill">
+        <div class="bg" id="homeBlood">—</div>
+        <div class="bl">Blood Group</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Donors</div><div class="stat-value" id="uTotalDonors">—</div></div>
+      <div class="stat-card"><div class="stat-label">Hospitals</div><div class="stat-value" id="uTotalHospitals">—</div></div>
+      <div class="stat-card"><div class="stat-label">My Donations</div><div class="stat-value" id="uMyDonCount">—</div></div>
+      <div class="stat-card urgent"><div class="stat-label">My Requests</div><div class="stat-value" id="uMyReqCount">—</div></div>
+    </div>
+  </section>
+
+  <!-- FIND DONORS -->
+  <section id="uDonors" class="section">
+    <div class="page-header"><h1>Find Donors</h1></div>
+    <div style="display:flex;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+      <select id="filterBloodGroup" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <option value="">All Blood Groups</option>
+        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+      </select>
+      <select id="filterCity" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <option value="">All Cities</option>
+      </select>
+      <button class="btn-primary" onclick="filterDonors()">Search</button>
+      <button class="btn-secondary" onclick="loadAllDonors()">Show All</button>
+    </div>
+    <div class="donors-grid" id="donorsGrid">Loading...</div>
+  </section>
+
+  <!-- BLOOD STOCK -->
+  <section id="uStock" class="section">
+    <div class="page-header"><h1>Blood Stock</h1></div>
+    <div class="stock-overview">
+      <h2>Available Units Across All Hospitals</h2>
+      <div class="blood-grid" id="uStockGrid">Loading...</div>
+    </div>
+    <br/>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Hospital</th><th>Blood Group</th><th>Units Available</th><th>Last Updated</th></tr></thead>
+        <tbody id="uStockBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BLOOD REQUEST -->
+  <section id="uRequest" class="section">
+    <div class="page-header">
+      <h1>Blood Requests</h1>
+      <button class="btn-primary" onclick="openModal('reqModal')">+ New Request</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Patient</th><th>Blood Group</th><th>Units</th><th>Hospital</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="uReqBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MY DONATIONS -->
+  <section id="uMyDonations" class="section">
+    <div class="page-header"><h1>My Donation History</h1></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Hospital</th><th>Date</th><th>Units Donated</th></tr></thead>
+        <tbody id="uDonBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MY PROFILE -->
+  <section id="uProfile" class="section">
+    <div class="page-header"><h1>My Profile</h1>
+      <button class="btn-primary" onclick="openModal('editModal')">Edit Profile</button>
+    </div>
+    <div class="profile-banner">
+      <div class="avatar" id="profAvatar">?</div>
+      <div class="profile-info">
+        <h2 id="profName">—</h2>
+        <p id="profEmail">—</p>
+        <p id="profPhone">—</p>
+        <p id="profCity">—</p>
+        <p id="profAddress">—</p>
+      </div>
+      <div class="blood-pill">
+        <div class="bg" id="profBlood">—</div>
+        <div class="bl">Blood Group</div>
+      </div>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card"><div class="stat-label">Age</div><div class="stat-value" id="profAge">—</div></div>
+      <div class="stat-card"><div class="stat-label">Gender</div><div class="stat-value" id="profGender" style="font-size:18px">—</div></div>
+      <div class="stat-card"><div class="stat-label">Available to Donate</div><div class="stat-value" id="profAvailable" style="font-size:16px">—</div></div>
+    </div>
+  </section>
+</main>
+
+<!-- Request Modal -->
+<div class="modal-overlay" id="reqModal">
+  <div class="modal">
+    <div class="modal-header"><h2>New Blood Request</h2><span class="close" onclick="closeModal('reqModal')">&times;</span></div>
+    <form onsubmit="submitRequest(event)">
+      <div class="form-row">
+        <div class="form-group"><label>Patient Name</label><input type="text" id="rqPatient" required/></div>
+        <div class="form-group"><label>Blood Group</label>
+          <select id="rqBG"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Units Required</label><input type="number" id="rqUnits" min="1" required/></div>
+        <div class="form-group"><label>Date</label><input type="date" id="rqDate" required/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="rqCity"/></div>
+        <div class="form-group"><label>Hospital ID</label><input type="number" id="rqHospId" required/></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('reqModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Submit Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header"><h2>Edit Profile</h2><span class="close" onclick="closeModal('editModal')">&times;</span></div>
+    <form onsubmit="updateProfile(event)">
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input type="text" id="epPhone"/></div>
+        <div class="form-group"><label>City</label><input type="text" id="epCity"/></div>
+      </div>
+      <div class="form-group"><label>Address</label><input type="text" id="epAddress"/></div>
+      <div class="form-group">
+        <label><input type="checkbox" id="epAvailable"/> Available to Donate</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  const role = sessionStorage.getItem('role');
+  let user = JSON.parse(sessionStorage.getItem('user') || 'null');
+  if (!user || role !== 'donor') window.location.href = 'login.html';
+
+  function showSection(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.closest('li').classList.add('active');
+    if (id === 'uDonors') loadAllDonors();
+    if (id === 'uStock') loadStock();
+    if (id === 'uRequest') loadRequests();
+    if (id === 'uMyDonations') loadMyDonations();
+    if (id === 'uProfile') loadProfile();
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
+
+  // Home
+  async function loadHome() {
+    const initials = user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').toUpperCase() : '?';
+    document.getElementById('homeAvatar').textContent = initials;
+    document.getElementById('welcomeMsg').textContent = 'Welcome, ' + (user.fullName || 'Donor') + '!';
+    document.getElementById('homeName').textContent = user.fullName || '—';
+    document.getElementById('homeEmail').textContent = '✉ ' + (user.email || '—');
+    document.getElementById('homePhone').textContent = '📞 ' + (user.phone || '—');
+    document.getElementById('homeCity').textContent = '📍 ' + (user.city || '—');
+    document.getElementById('homeBlood').textContent = user.bloodGroup || '—';
+
+    try {
+      const [donors, hospitals, donations, requests] = await Promise.all([
+        fetch(`${API}/donors`).then(r=>r.json()),
+        fetch(`${API}/hospitals`).then(r=>r.json()),
+        fetch(`${API}/donations/donor/${user.donorId}`).then(r=>r.json()),
+        fetch(`${API}/requests`).then(r=>r.json())
+      ]);
+      document.getElementById('uTotalDonors').textContent = donors.length;
+      document.getElementById('uTotalHospitals').textContent = hospitals.length;
+      document.getElementById('uMyDonCount').textContent = donations.length;
+      document.getElementById('uMyReqCount').textContent = requests.length;
+    } catch(e) {}
+  }
+
+  // Find Donors
+  let allDonors = [];
+  async function loadAllDonors() {
+    allDonors = await fetch(`${API}/donors`).then(r=>r.json());
+    // populate city filter
+    const cities = [...new Set(allDonors.map(d=>d.city).filter(Boolean))];
+    const citySelect = document.getElementById('filterCity');
+    citySelect.innerHTML = '<option value="">All Cities</option>' + cities.map(c=>`<option>${c}</option>`).join('');
+    renderDonors(allDonors.filter(d => d.availableToDonate));
+  }
+
+  function filterDonors() {
+    const bg = document.getElementById('filterBloodGroup').value;
+    const city = document.getElementById('filterCity').value;
+    let filtered = allDonors.filter(d => d.availableToDonate);
+    if (bg) filtered = filtered.filter(d => d.bloodGroup === bg);
+    if (city) filtered = filtered.filter(d => d.city === city);
+    renderDonors(filtered);
+  }
+
+  function renderDonors(donors) {
+    const grid = document.getElementById('donorsGrid');
+    if (!donors.length) { grid.innerHTML = '<p style="color:#aaa;padding:2rem">No donors found for the selected criteria.</p>'; return; }
+    grid.innerHTML = donors.map(d => `
+      <div class="donor-card">
+        <div class="donor-avatar">${d.bloodGroup}</div>
+        <div class="donor-info">
+          <strong>${d.fullName}</strong>
+          <span>${d.city || '—'} &bull; ${d.gender || '—'} &bull; Age ${d.age || '—'}</span>
+          <span style="display:block;margin-top:4px">📞 ${d.phone || '—'}</span>
+        </div>
+        <span class="badge badge-green" style="flex-shrink:0">Available</span>
+      </div>`).join('');
+  }
+
+  // Blood Stock
+  async function loadStock() {
+    const stock = await fetch(`${API}/stock`).then(r=>r.json());
+    const groups = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+    const totals = {};
+    groups.forEach(g => totals[g] = 0);
+    stock.forEach(s => { if (totals[s.bloodGroup] !== undefined) totals[s.bloodGroup] += s.unitsAvailable; });
+    document.getElementById('uStockGrid').innerHTML = groups.map(g => `
+      <div class="blood-card ${totals[g] < 5 ? 'low' : 'ok'}">
+        <div class="blood-type">${g}</div>
+        <div class="blood-units">${totals[g]}</div>
+        <div class="blood-label">units</div>
+      </div>`).join('');
+    document.getElementById('uStockBody').innerHTML = stock.map(s => `
+      <tr>
+        <td>${s.hospitalName || 'Hospital #'+s.hospitalId}</td>
+        <td><span class="badge badge-red">${s.bloodGroup}</span></td>
+        <td class="${s.unitsAvailable < 5 ? 'status-rejected' : 'status-approved'}"><strong>${s.unitsAvailable}</strong></td>
+        <td>${s.lastUpdated || '—'}</td>
+      </tr>`).join('');
+  }
+
+  // Requests
+  async function loadRequests() {
+    const requests = await fetch(`${API}/requests`).then(r=>r.json());
+    document.getElementById('uReqBody').innerHTML = requests.map(r => `
+      <tr>
+        <td><strong>${r.patientName}</strong></td>
+        <td><span class="badge badge-red">${r.bloodGroup}</span></td>
+        <td>${r.unitsRequired}</td>
+        <td>Hospital #${r.hospitalId}</td>
+        <td>${r.requestDate}</td>
+        <td><span class="status-${(r.status||'pending').toLowerCase()}">${r.status||'Pending'}</span></td>
+      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:2rem">No requests found</td></tr>';
+  }
+
+  async function submitRequest(e) {
+    e.preventDefault();
+    const r = {
+      patientName: document.getElementById('rqPatient').value,
+      bloodGroup: document.getElementById('rqBG').value,
+      unitsRequired: +document.getElementById('rqUnits').value,
+      requestDate: document.getElementById('rqDate').value,
+      city: document.getElementById('rqCity').value,
+      hospitalId: +document.getElementById('rqHospId').value,
+      status: 'Pending'
+    };
+    await fetch(`${API}/requests`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(r)});
+    closeModal('reqModal'); toast('Blood request submitted!');
+    loadRequests(); e.target.reset();
+  }
+
+  // My Donations
+  async function loadMyDonations() {
+    const donations = await fetch(`${API}/donations/donor/${user.donorId}`).then(r=>r.json());
+    document.getElementById('uDonBody').innerHTML = donations.map(d => `
+      <tr>
+        <td>${d.hospitalName || 'Hospital #'+d.hospitalId}</td>
+        <td>${d.donationDate}</td>
+        <td><strong>${d.unitsDonated}</strong> units</td>
+      </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:2rem">No donations yet</td></tr>';
+  }
+
+  // Profile
+  function loadProfile() {
+    const initials = user.fullName ? user.fullName.split(' ').map(n=>n[0]).join('').toUpperCase() : '?';
+    document.getElementById('profAvatar').textContent = initials;
+    document.getElementById('profName').textContent = user.fullName || '—';
+    document.getElementById('profEmail').textContent = '✉ ' + (user.email || '—');
+    document.getElementById('profPhone').textContent = '📞 ' + (user.phone || '—');
+    document.getElementById('profCity').textContent = '📍 ' + (user.city || '—');
+    document.getElementById('profAddress').textContent = '🏠 ' + (user.address || '—');
+    document.getElementById('profBlood').textContent = user.bloodGroup || '—';
+    document.getElementById('profAge').textContent = user.age || '—';
+    document.getElementById('profGender').textContent = user.gender || '—';
+    document.getElementById('profAvailable').textContent = user.availableToDonate ? '✅ Yes' : '❌ No';
+    // prefill edit form
+    document.getElementById('epPhone').value = user.phone || '';
+    document.getElementById('epCity').value = user.city || '';
+    document.getElementById('epAddress').value = user.address || '';
+    document.getElementById('epAvailable').checked = user.availableToDonate || false;
+  }
+
+  async function updateProfile(e) {
+    e.preventDefault();
+    const updated = {
+      ...user,
+      phone: document.getElementById('epPhone').value,
+      city: document.getElementById('epCity').value,
+      address: document.getElementById('epAddress').value,
+      availableToDonate: document.getElementById('epAvailable').checked
+    };
+    const res = await fetch(`${API}/donors/${user.donorId}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(updated)
+    });
+    if (res.ok) {
+      user = await res.json();
+      sessionStorage.setItem('user', JSON.stringify(user));
+      closeModal('editModal');
+      toast('Profile updated!');
+      loadProfile();
+    }
+  }
+
+  loadHome();
+</script>
+</body>
+</html>
